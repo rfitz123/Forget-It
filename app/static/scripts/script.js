@@ -55,6 +55,7 @@ class Node {
             <li>
                 <div style='border: 2px dashed black'>
                     ${this.name}
+                    <ul id='0${this.id}'></ul>
                 </div>
             </li>
             `;
@@ -65,12 +66,9 @@ class Node {
 }
 
 function listChildren(id, tree){
-    console.log("in1");
     for (var key in tree) {
-        console.log(key.length == id.length + 1);
-        console.log(key.slice(0, id.length) === id);
         if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
-            document.getElementById('list-0').innerHTML += tree[key].toHtml();
+            document.getElementById('0' + id).innerHTML += tree[key].toHtml();
         }
     }
 }
