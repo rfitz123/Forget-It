@@ -5,10 +5,10 @@ class Node {
     Node class contains parent, pointing to its parent node.
     */
 
-    constructor(id, link, cargo = null, name = null, parent = null, children = []) {
+    constructor(id, isLink, link, name, parent, children) {
         this.id = id;
+        this.isLink = isLink;
         this.link = link;
-        this.cargo = cargo;
         this.name = name;
         this.parent = parent;
         this.children = children;
@@ -24,11 +24,11 @@ class Node {
     */
 
     toString() {
-        node_str = "";
+        var node_str = "";
 
-        if (this.link) {
+        if (this.isLink) {
             node_str += "l";
-            node_str += this.cargo;
+            node_str += this.link;
         } else {
             node_str += "d";
             node_str += this.name;
@@ -39,17 +39,45 @@ class Node {
         
         return node_str;
     }
+
+    toHtml() {
+        var html_str = "";
+
+        if (this.isLink) {
+            html_str = `
+            <li>
+                <div style='border: 2px dashed black'>
+                    <a href=${this.link}>${this.link}</a>
+                </div>
+            </li>
+            `;
+        } else {
+            html_str = `
+            <li>
+                <div style='border: 2px dashed black'>
+                    ${this.name}
+                </div>
+            </li>
+            `;
+        }
+
+        return html_str
+    }
 }
 
 function promptText(node) {
 
 }
 
-var tree = {};
+var tree = {
+    1: new Node(0, true, "http://www.google.com", "", 0, []), 
+    2: new Node(1, false, "","Main Branch", 0, [])
+};
 
 /* Creates an event listener for the option to create link or directory for each node. */
 /* FIX, THEY ARE NOT APPLICABLE TO LINK KEYS IF STATEMENT? */
 for (var key in tree) {
-    document.getElementById("bl" + tree[key].id).addEventListener("click", promptText(tree[key]));
-    document.getElementById("bd" + tree[key].id).addEventListener("click", promptText(tree[key]));
+    document.getElementById('list-0').innerHTML += tree[key].toHtml();
+    // document.getElementById("bl" + tree[key].id).addEventListener("click", promptText(tree[key]));
+    // document.getElementById("bd" + tree[key].id).addEventListener("click", promptText(tree[key]));
 }

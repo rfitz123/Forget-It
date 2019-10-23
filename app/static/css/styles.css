@@ -15,6 +15,17 @@ body {
     min-height: 100%;
 }
 
+.link-space {
+    position: absolute;
+    width: calc(100% - 10px);
+    height: auto;
+    border: 5px solid black;
+    text-align: center;
+    top: 40%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%)
+}
+
 .ground {
     position: absolute;
     height: 20%;
