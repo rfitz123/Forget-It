@@ -5,13 +5,12 @@ class Node {
     Node class contains parent, pointing to its parent node.
     */
 
-    constructor(id, isLink, link, name, parent, children) {
+    constructor(id, isLink, link, name, parent) {
         this.id = id;
         this.isLink = isLink;
         this.link = link;
         this.name = name;
         this.parent = parent;
-        this.children = children;
     }
 
     /*
@@ -65,19 +64,37 @@ class Node {
     }
 }
 
+function listChildren(id, tree){
+    console.log("in1");
+    for (var key in tree) {
+        console.log(key.length == id.length + 1);
+        console.log(key.slice(0, id.length) === id);
+        if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
+            document.getElementById('list-0').innerHTML += tree[key].toHtml();
+        }
+    }
+}
+
 function promptText(node) {
 
 }
 
-var tree = {
-    1: new Node(0, true, "http://www.google.com", "", 0, []), 
-    2: new Node(1, false, "","Main Branch", 0, [])
+var linkTree = {
+    '1': new Node('1', true, "http://www.google.com", "", '0'), 
+    '2': new Node('2', false, "","Entertainment", '0'),
+    '21': new Node('21', true, "http://www.youtube.com", "", '2'),
+    '22': new Node('22', false, "", "Games", '2'),
+    '221': new Node('221', true, "http://addictinggames.com", "", '22')
 };
+
+listChildren('', linkTree);
+listChildren('2', linkTree);
+listChildren('22', linkTree);
 
 /* Creates an event listener for the option to create link or directory for each node. */
 /* FIX, THEY ARE NOT APPLICABLE TO LINK KEYS IF STATEMENT? */
-for (var key in tree) {
-    document.getElementById('list-0').innerHTML += tree[key].toHtml();
-    // document.getElementById("bl" + tree[key].id).addEventListener("click", promptText(tree[key]));
-    // document.getElementById("bd" + tree[key].id).addEventListener("click", promptText(tree[key]));
-}
+// for (var key in tree) {
+//     document.getElementById('list-0').innerHTML += tree[key].toHtml();
+//     // document.getElementById("bl" + tree[key].id).addEventListener("click", promptText(tree[key]));
+//     // document.getElementById("bd" + tree[key].id).addEventListener("click", promptText(tree[key]));
+// }
