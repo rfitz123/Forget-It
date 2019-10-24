@@ -5,12 +5,13 @@ class Node {
     Node class contains parent, pointing to its parent node.
     */
 
-    constructor(id, isLink, link, name, parent) {
+    constructor(id, isLink, link, name, parent, children) {
         this.id = id;
         this.isLink = isLink;
         this.link = link;
         this.name = name;
         this.parent = parent;
+        this.children = children;
     }
 
     /*
@@ -54,8 +55,17 @@ class Node {
             html_str = `
             <li>
                 <div style='border: 2px dashed black'>
-                    ${this.name}
+                    <button class='button'>
+                        <i class='fas fa-angle-down'></i>
+                    </button>
+                        ${this.name}
                     <ul id='0${this.id}'></ul>
+                    <button class='button'>
+                        <i class='fas fa-folder-plus'></i>
+                    </button>
+                    <button class='button'>
+                        <i class='fas fa-link'></i>
+                    </button>
                 </div>
             </li>
             `;
@@ -65,7 +75,9 @@ class Node {
     }
 }
 
+/* Visually lays out children of  */
 function listChildren(id, tree){
+    console.log(tree);
     for (var key in tree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
             document.getElementById('0' + id).innerHTML += tree[key].toHtml();
@@ -73,26 +85,34 @@ function listChildren(id, tree){
     }
 }
 
+/* Prompts user text to create a folder or link */
 function promptText(node) {
-
+    console.log("in");
+    node.children += 1;
+    linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), true, "https://www.butts.com", "", node.id, 0);
+    loadTree();
 }
 
+/* Dictionary holding our tree of Nodes */
 var linkTree = {
-    '1': new Node('1', true, "http://www.google.com", "", '0'), 
-    '2': new Node('2', false, "","Entertainment", '0'),
-    '21': new Node('21', true, "http://www.youtube.com", "", '2'),
-    '22': new Node('22', false, "", "Games", '2'),
-    '221': new Node('221', true, "http://addictinggames.com", "", '22')
+    '0': new Node('0', false, "", "", '', 0)
 };
 
-listChildren('', linkTree);
-listChildren('2', linkTree);
-listChildren('22', linkTree);
+/* Function to visually load tree and event listeners, reused every time an edit is made */
+function loadTree() {
+    listChildren('', linkTree);
+}
 
 /* Creates an event listener for the option to create link or directory for each node. */
-/* FIX, THEY ARE NOT APPLICABLE TO LINK KEYS IF STATEMENT? */
-// for (var key in tree) {
-//     document.getElementById('list-0').innerHTML += tree[key].toHtml();
-//     // document.getElementById("bl" + tree[key].id).addEventListener("click", promptText(tree[key]));
-//     // document.getElementById("bd" + tree[key].id).addEventListener("click", promptText(tree[key]));
-// }
+window.onload = function () {
+    for (var key in linkTree) {
+        if (!linkTree[key].link) {
+            document.getElementById("l" + linkTree[key].id).addEventListener("click", function () {
+                promptText(linkTree[key]);
+            });
+            document.getElementById("d" + linkTree[key].id).addEventListener("click", function () {
+                promptText(linkTree[key]);
+            });
+        }
+    }
+}

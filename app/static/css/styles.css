@@ -25,6 +25,16 @@ body {
     transform: translateY(-50%)
 }
 
+.button {
+    background-color: #2cb84b;
+    border: none;
+    color: white;
+    padding: 15px 25px;
+    text-align: center;
+    font-size: 25px;
+    cursor: pointer;
+}
+
 .ground {
     position: absolute;
     height: 20%;
