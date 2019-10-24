@@ -42,6 +42,7 @@ class Node {
 
     toHtml() {
         var html_str = "";
+        console.log(this);
 
         if (this.isLink) {
             html_str = `
@@ -52,18 +53,16 @@ class Node {
             </li>
             `;
         } else {
+            console.log(this.id);
             html_str = `
             <li>
                 <div style='border: 2px dashed black'>
-                    <button class='button'>
-                        <i class='fas fa-angle-down'></i>
-                    </button>
                         ${this.name}
-                    <ul id='0${this.id}'></ul>
-                    <button class='button'>
+                    <ul id='${this.id}'></ul>
+                    <button class='button' id=d${this.id}>
                         <i class='fas fa-folder-plus'></i>
                     </button>
-                    <button class='button'>
+                    <button class='button' id=l${this.id}>
                         <i class='fas fa-link'></i>
                     </button>
                 </div>
@@ -77,20 +76,36 @@ class Node {
 
 /* Visually lays out children of  */
 function listChildren(id, tree){
-    console.log(tree);
     for (var key in tree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
-            document.getElementById('0' + id).innerHTML += tree[key].toHtml();
+            document.getElementById(id).innerHTML += tree[key].toHtml();
         }
     }
 }
 
 /* Prompts user text to create a folder or link */
-function promptText(node) {
-    console.log("in");
+function promptText(node, isLink) {
     node.children += 1;
-    linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), true, "https://www.butts.com", "", node.id, 0);
+
+    /* Looks long because we ensure link text is " " rather than null */
+    linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), isLink, 
+        document.getElementById('text-field').value == "" ? " " : document.getElementById('text-field').value, "", node.id, 0);
+
+    /* Refresh text field */
+    document.getElementById('text-field').value = "";
+
     loadTree();
+
+    console.log("d" + node.id + node.children.toString());
+    
+    if (!linkTree[node.id + node.children.toString()].isLink) {
+        document.getElementById("d" + node.id + node.children.toString()).addEventListener("click", function () {
+            promptText(linkTree[node.id + node.children.toString()], false);
+        });
+        document.getElementById("l" + node.id + node.children.toString()).addEventListener("click", function () {
+            promptText(linkTree[node.id + node.children.toString()], true);
+        });
+    }
 }
 
 /* Dictionary holding our tree of Nodes */
@@ -100,18 +115,31 @@ var linkTree = {
 
 /* Function to visually load tree and event listeners, reused every time an edit is made */
 function loadTree() {
-    listChildren('', linkTree);
+    document.getElementById('0').innerHTML = "";
+        
+    ids = [];
+
+    for (key in linkTree) {
+        if (!ids.includes(key)) {
+            ids.push(key);
+        }
+    }
+
+    for (i = 0; i < ids.length; i++) {
+        listChildren(ids[i], linkTree);
+    }
 }
 
 /* Creates an event listener for the option to create link or directory for each node. */
 window.onload = function () {
+    console.log("onload");
     for (var key in linkTree) {
         if (!linkTree[key].link) {
-            document.getElementById("l" + linkTree[key].id).addEventListener("click", function () {
-                promptText(linkTree[key]);
-            });
             document.getElementById("d" + linkTree[key].id).addEventListener("click", function () {
-                promptText(linkTree[key]);
+                promptText(linkTree[key], false);
+            });
+            document.getElementById("l" + linkTree[key].id).addEventListener("click", function () {
+                promptText(linkTree[key], true);
             });
         }
     }

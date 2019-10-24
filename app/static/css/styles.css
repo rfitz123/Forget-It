@@ -28,11 +28,16 @@ body {
 .button {
     background-color: #2cb84b;
     border: none;
+    outline: none;
     color: white;
     padding: 15px 25px;
     text-align: center;
     font-size: 25px;
     cursor: pointer;
+}
+
+.button:hover {
+    background-color: #54bf6c;
 }
 
 .ground {
