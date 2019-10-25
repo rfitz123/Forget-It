@@ -36,13 +36,12 @@ class Node {
 
         node_str += ".";
         node_str += this.parent;
-        
+
         return node_str;
     }
 
     toHtml() {
         var html_str = "";
-        console.log(this);
 
         if (this.isLink) {
             html_str = `
@@ -53,7 +52,6 @@ class Node {
             </li>
             `;
         } else {
-            console.log(this.id);
             html_str = `
             <li>
                 <div style='border: 2px dashed black'>
@@ -74,38 +72,65 @@ class Node {
     }
 }
 
-/* Visually lays out children of  */
-function listChildren(id, tree){
+/* Visually lays out children of Node id */
+function listChildren(id, ids, tree) {
     for (var key in tree) {
-        if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
+        if (key.length == id.length + 1 && key.slice(0, id.length) === id && !ids.includes(key)) {
             document.getElementById(id).innerHTML += tree[key].toHtml();
         }
     }
 }
 
+/* Creates all eventhandlers. INEFFICIENT */
+function createEventHandlers(tree) {
+    for (key in linkTree) {
+        if (key == '0') {
+            continue;
+        }
+        if (!linkTree[key].isLink) {
+            console.log(linkTree[key]);
+            document.getElementById("d" + key).addEventListener("click", function () {
+                promptText(linkTree[key], false);
+            });
+            document.getElementById("l" + key).addEventListener("click", function () {
+                promptText(linkTree[key], true);
+            });
+        }
+    }
+}
+
+/* Takes a link and ensures it is in a usable form */
+function verifyLink(link) {
+    if (link !== " " && link.slice(0, 4) !== "http") {
+        link = "http://" + link;
+    }
+
+    return link;
+}
+
 /* Prompts user text to create a folder or link */
 function promptText(node, isLink) {
+    console.log("click");
     node.children += 1;
 
-    /* Looks long because we ensure link text is " " rather than null */
-    linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), isLink, 
-        document.getElementById('text-field').value == "" ? " " : document.getElementById('text-field').value, "", node.id, 0);
+    textValue = document.getElementById('text-field').value;
+    textValue = textValue == "" ? " " : textValue;
+
+    /* Create Node for either a link or a directory */
+    if (isLink) {
+        textValue = verifyLink(textValue);
+
+        linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), true, textValue, "", node.id, 0);
+    } else {
+        console.log(node.id + node.children.toString());
+        linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), false, "", textValue, node.id, 0);
+    }
 
     /* Refresh text field */
     document.getElementById('text-field').value = "";
 
     loadTree();
-
-    console.log("d" + node.id + node.children.toString());
-    
-    if (!linkTree[node.id + node.children.toString()].isLink) {
-        document.getElementById("d" + node.id + node.children.toString()).addEventListener("click", function () {
-            promptText(linkTree[node.id + node.children.toString()], false);
-        });
-        document.getElementById("l" + node.id + node.children.toString()).addEventListener("click", function () {
-            promptText(linkTree[node.id + node.children.toString()], true);
-        });
-    }
+    createEventHandlers();
 }
 
 /* Dictionary holding our tree of Nodes */
@@ -113,20 +138,16 @@ var linkTree = {
     '0': new Node('0', false, "", "", '', 0)
 };
 
+/* List holding all loaded Node ids */
+var ids = ["0"];
+
 /* Function to visually load tree and event listeners, reused every time an edit is made */
 function loadTree() {
-    document.getElementById('0').innerHTML = "";
-        
-    ids = [];
-
     for (key in linkTree) {
         if (!ids.includes(key)) {
+            listChildren(key.slice(0, -1), ids, linkTree);
             ids.push(key);
         }
-    }
-
-    for (i = 0; i < ids.length; i++) {
-        listChildren(ids[i], linkTree);
     }
 }
 
