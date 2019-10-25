@@ -46,7 +46,7 @@ class Node {
         if (this.isLink) {
             html_str = `
             <li>
-                <div style='border: 2px dashed black'>
+                <div>
                     <a href=${this.link}>${this.link}</a>
                 </div>
             </li>
@@ -54,7 +54,7 @@ class Node {
         } else {
             html_str = `
             <li>
-                <div style='border: 2px dashed black'>
+                <div>
                     ${this.name}
                     <ul id='${this.id}'></ul>
                     <button class='button' id=d${this.id}>
@@ -107,26 +107,29 @@ function verifyLink(link) {
 /* Prompts user text to create a folder or link */
 function promptText(key, isLink) {
     var node = linkTree[key];
-    console.log("clicked");
-    console.log(key);
     node.children += 1;
     id = node.id + node.children.toString();
 
-    textValue = document.getElementById('text-field').value;
-    textValue = textValue == "" ? " " : textValue;
+    textValue = document.getElementById('my-text-field').value;
 
     /* Create Node for either a link or a directory */
     if (isLink) {
+
+        /* Don't make an empty link node */
+        if (textValue == "") {
+            return;
+        }
+
+        /* Makes the link more usable */
         textValue = verifyLink(textValue);
 
         linkTree[id] = new Node(id, true, textValue, "", node.id, 0);
     } else {
-        console.log(id);
         linkTree[id] = new Node(id, false, "", textValue, node.id, 0);
     }
 
     /* Refresh text field */
-    document.getElementById('text-field').value = "";
+    document.getElementById('my-text-field').value = "";
 
     loadTree();
     createEventHandlers(id.slice(0, -1));
