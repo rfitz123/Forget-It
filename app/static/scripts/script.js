@@ -55,7 +55,7 @@ class Node {
             html_str = `
             <li>
                 <div style='border: 2px dashed black'>
-                        ${this.name}
+                    ${this.name}
                     <ul id='${this.id}'></ul>
                     <button class='button' id=d${this.id}>
                         <i class='fas fa-folder-plus'></i>
@@ -73,27 +73,23 @@ class Node {
 }
 
 /* Visually lays out children of Node id */
-function listChildren(id, ids, tree) {
-    for (var key in tree) {
+function listChildren(id, ids) {
+    for (var key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !ids.includes(key)) {
-            document.getElementById(id).innerHTML += tree[key].toHtml();
+            document.getElementById(id).innerHTML += linkTree[key].toHtml();
         }
     }
 }
 
-/* Creates all eventhandlers. INEFFICIENT */
-function createEventHandlers(tree) {
-    for (key in linkTree) {
-        if (key == '0') {
-            continue;
-        }
-        if (!linkTree[key].isLink) {
-            console.log(linkTree[key]);
+/* Creates all eventhandlers under id parent */
+function createEventHandlers(id) {
+    for (var key in linkTree) {
+        if (key.length == id.length + 1 && key.slice(0, id.length) === id && !linkTree[key].isLink) {
             document.getElementById("d" + key).addEventListener("click", function () {
-                promptText(linkTree[key], false);
+                promptText(this.id.substr(1), false);
             });
             document.getElementById("l" + key).addEventListener("click", function () {
-                promptText(linkTree[key], true);
+                promptText(this.id.substr(1), true);
             });
         }
     }
@@ -109,9 +105,12 @@ function verifyLink(link) {
 }
 
 /* Prompts user text to create a folder or link */
-function promptText(node, isLink) {
-    console.log("click");
+function promptText(key, isLink) {
+    var node = linkTree[key];
+    console.log("clicked");
+    console.log(key);
     node.children += 1;
+    id = node.id + node.children.toString();
 
     textValue = document.getElementById('text-field').value;
     textValue = textValue == "" ? " " : textValue;
@@ -120,17 +119,17 @@ function promptText(node, isLink) {
     if (isLink) {
         textValue = verifyLink(textValue);
 
-        linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), true, textValue, "", node.id, 0);
+        linkTree[id] = new Node(id, true, textValue, "", node.id, 0);
     } else {
-        console.log(node.id + node.children.toString());
-        linkTree[node.id + node.children.toString()] = new Node(node.id + node.children.toString(), false, "", textValue, node.id, 0);
+        console.log(id);
+        linkTree[id] = new Node(id, false, "", textValue, node.id, 0);
     }
 
     /* Refresh text field */
     document.getElementById('text-field').value = "";
 
     loadTree();
-    createEventHandlers();
+    createEventHandlers(id.slice(0, -1));
 }
 
 /* Dictionary holding our tree of Nodes */
@@ -145,7 +144,7 @@ var ids = ["0"];
 function loadTree() {
     for (key in linkTree) {
         if (!ids.includes(key)) {
-            listChildren(key.slice(0, -1), ids, linkTree);
+            listChildren(key.slice(0, -1), ids);
             ids.push(key);
         }
     }
@@ -153,14 +152,13 @@ function loadTree() {
 
 /* Creates an event listener for the option to create link or directory for each node. */
 window.onload = function () {
-    console.log("onload");
     for (var key in linkTree) {
         if (!linkTree[key].link) {
             document.getElementById("d" + linkTree[key].id).addEventListener("click", function () {
-                promptText(linkTree[key], false);
+                promptText(key, false);
             });
             document.getElementById("l" + linkTree[key].id).addEventListener("click", function () {
-                promptText(linkTree[key], true);
+                promptText(key, true);
             });
         }
     }
