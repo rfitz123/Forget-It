@@ -18,12 +18,13 @@ class Node {
     String is formatted as such
     l (link) or d (directory)
     The content, link for a link and directory name for a directory
+    . followed by the id
 
-    Ex: dNeuroscience
-    Ex: lwww.youtube.com/watch?v=pp-gA1FATyg
+    Ex: dNeuroscience.132
+    Ex: lwww.youtube.com/watch?v=pp-gA1FATyg.2212
     */
 
-    toString() {
+    toStorageString() {
         var node_str = "";
 
         if (this.isLink) {
@@ -34,8 +35,8 @@ class Node {
             node_str += this.name;
         }
 
-        node_str += ".";
-        node_str += this.parent;
+        node_str += ",";
+        node_str += this.id.substr(1);
 
         return node_str;
     }
@@ -44,10 +45,13 @@ class Node {
         var html_str = "";
 
         if (this.isLink) {
+            /* Makes the link more usable */
+            var textValue = verifyLink(this.link);
+
             html_str = `
             <li>
                 <div>
-                    <a href=${this.link}>${this.link}</a>
+                    <a href=${textValue}>${textValue}</a>
                 </div>
             </li>
             `;
@@ -76,7 +80,10 @@ class Node {
 function listChildren(id, ids) {
     for (var key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !ids.includes(key)) {
+            console.log("heres a key:");
+            console.log(key);
             document.getElementById(id).innerHTML += linkTree[key].toHtml();
+            ids.push(key);    
         }
     }
 }
@@ -85,6 +92,7 @@ function listChildren(id, ids) {
 function createEventHandlers(id) {
     for (var key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !linkTree[key].isLink) {
+            console.log(key);
             document.getElementById("d" + key).addEventListener("click", function () {
                 promptText(this.id.substr(1), false);
             });
@@ -106,6 +114,7 @@ function verifyLink(link) {
 
 /* Prompts user text to create a folder or link */
 function promptText(key, isLink) {
+    console.log("PROMPTED");
     var node = linkTree[key];
     node.children += 1;
     id = node.id + node.children.toString();
@@ -120,12 +129,11 @@ function promptText(key, isLink) {
             return;
         }
 
-        /* Makes the link more usable */
-        textValue = verifyLink(textValue);
-
         linkTree[id] = new Node(id, true, textValue, "", node.id, 0);
+        window.localStorage.setItem(id, linkTree[id].toStorageString())
     } else {
         linkTree[id] = new Node(id, false, "", textValue, node.id, 0);
+        window.localStorage.setItem(id, linkTree[id].toStorageString())
     }
 
     /* Refresh text field */
@@ -143,14 +151,27 @@ var linkTree = {
 /* List holding all loaded Node ids */
 var ids = ["0"];
 
-/* Function to visually load tree and event listeners, reused every time an edit is made */
+/* Visually loads tree and event listeners, reused every time an edit is made */
 function loadTree() {
     for (key in linkTree) {
         if (!ids.includes(key)) {
+            console.log("didnt include");
+            console.log(key);
             listChildren(key.slice(0, -1), ids);
-            ids.push(key);
         }
+        console.log(ids);
     }
+}
+
+/* Comparison function to sort localStorage items */
+function compare(a, b) {
+    if (a[1].split(',')[1] < b[1].split(',')[1]){
+      return -1;
+    }
+    if (a[1].split(',')[1] < b[1].split(',')[1]){
+      return 1;
+    }
+    return 0;
 }
 
 /* Creates an event listener for the option to create link or directory for each node. */
@@ -163,6 +184,41 @@ window.onload = function () {
             document.getElementById("l" + linkTree[key].id).addEventListener("click", function () {
                 promptText(key, true);
             });
+        }
+    }
+
+    storageItems = Object.entries(localStorage);
+    storageItems.sort(compare);
+    console.log(storageItems);
+
+    for (var i = 0; i < storageItems.length; i++) {
+        var code = storageItems[i][1];
+
+        var ld = code.substr(0, 1);
+        code = code.substr(1).split(',');
+
+        /* We removed the leading 0 for storage efficiency, putting it back */
+        code[1] = "0" + code[1];
+
+        /* Create Node for either a link or a directory */
+        if (ld === "l") {
+            linkTree[code[1]] = new Node(code[1], true, code[0], "", code[1].slice(0, -1), 0);
+        } else {
+            linkTree[code[1]] = new Node(code[1], false, "", code[0], code[1].slice(0, -1), 0);
+        }
+    }
+
+    loadTree();
+
+    /* Create event handlers */
+    for (var i = 0; i < storageItems.length; i++) {
+        var code = storageItems[i][1];
+        var id = "0" + storageItems[i][1].split(',')[1];
+        var ld = code.substr(0, 1);
+
+        /* Only create if directory */
+        if (ld === "d") {
+            createEventHandlers(id.slice(0, -1));
         }
     }
 }
