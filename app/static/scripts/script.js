@@ -50,9 +50,11 @@ class Node {
 
             html_str = `
             <li>
-                <div>
-                    <a href=${textValue}>${textValue}</a>
-                </div>
+                    <div id='div${this.id}' style='display: block; padding-bottom: 20px;'>
+                        <a href=${textValue}>
+                            <div class='link-leaf'>${textValue}</div>
+                        </a>
+                    </div>
             </li>
             `;
         } else {
@@ -61,7 +63,8 @@ class Node {
                 <div>
                     <ul id='${this.id}'></ul>
                     ${this.name}
-                    <div style='display: block;'>
+                    <div style='height: calc(${10 / this.id.length}vh - 70px);'></div>
+                    <div id='div${this.id}' style='display: block;'>
                         <button class='button' id=d${this.id}>
                             <i class='fas fa-folder-plus'></i>
                         </button>
@@ -78,6 +81,30 @@ class Node {
     }
 }
 
+/* Connects Nodes */
+function connectNodes() {
+
+    /* Clear existing connections */
+    document.getElementById('connection-space').innerHTML = "";
+
+    for(var key in linkTree) {
+        if(key !== "0") {
+            childRect = document.getElementById("div" + key).getBoundingClientRect();
+            parentRect = document.getElementById("div" + key.slice(0, -1)).getBoundingClientRect();
+
+            console.log(key);
+            console.log(childRect);
+            console.log(parentRect);
+
+            x1 = childRect.left + (childRect.width / 2);
+            y1 = childRect.top + 27.5;
+            x2 = parentRect.left + (parentRect.width / 2);
+            y2 = parentRect.top + 27.5;
+            document.getElementById('connection-space').innerHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="40" stroke-linecap="round"/>`;
+        }
+    }
+}
+
 /* Visually lays out children of Node id */
 function listChildren(id, ids) {
     for (var key in linkTree) {
@@ -90,7 +117,6 @@ function listChildren(id, ids) {
 
 /* Creates all eventhandlers under id parent */
 function createEventHandlers(id) {
-    console.log("Createeventhandlers");
     for (var key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !linkTree[key].isLink) {
             console.log("key" + key);
@@ -119,7 +145,6 @@ function verifyLink(link) {
 
 /* Prompts user text to create a folder or link */
 function promptText(key, isLink) {
-    console.log("PROMPTED");
     var node = linkTree[key];
     node.children += 1;
     id = node.id + node.children.toString();
@@ -163,6 +188,7 @@ function loadTree() {
             listChildren(key.slice(0, -1), ids);
         }
     }
+    connectNodes();
 }
 
 /* Comparison function to sort localStorage items */
@@ -224,4 +250,5 @@ window.onload = function () {
             createEventHandlers(id.slice(0, -1));
         }
     }
+    connectNodes();
 }

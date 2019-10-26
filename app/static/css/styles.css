@@ -10,10 +10,6 @@ body {
     padding: 0;
 }
 
-/* div {
-    border: 5px solid black
-} */
-
 ul {
     list-style-type: none;
     padding: 0;
@@ -22,6 +18,16 @@ ul {
 ul > li {
     display: inline-block;
     zoom: 1;
+}
+
+.connection-space {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.svg {
+    position: absolute;
 }
 
 .parent {
@@ -37,6 +43,27 @@ ul > li {
     font-size: 0.75vw;
     text-align: center;
     bottom: calc(50% - 30px);
+}
+
+.link-leaf {
+    background-color: #2cb84b;
+    width: 110px;
+    height: 55px;
+    border-radius: 999px;
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+    vertical-align: middle;
+    line-height: 60px;
+}
+
+a {
+    padding-left: 27.5px;
+    text-decoration: none;
+}
+
+.link-leaf:hover {
+    background-color: #54bf6c;
 }
 
 .button {
@@ -61,6 +88,8 @@ ul > li {
     width: 2%;
     bottom: 20%;
     left: 50%;
+    border-top-left-radius: 999px;
+    border-top-right-radius: 999px;
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
     background-color: #755331;
