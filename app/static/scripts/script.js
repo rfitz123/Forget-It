@@ -18,10 +18,10 @@ class Node {
     String is formatted as such
     l (link) or d (directory)
     The content, link for a link and directory name for a directory
-    . followed by the id
+    , followed by the id
 
-    Ex: dNeuroscience.132
-    Ex: lwww.youtube.com/watch?v=pp-gA1FATyg.2212
+    Ex: dNeuroscience,132
+    Ex: lwww.youtube.com/watch?v=pp-gA1FATyg,2212
     */
 
     toStorageString() {
@@ -59,14 +59,16 @@ class Node {
             html_str = `
             <li>
                 <div>
-                    ${this.name}
                     <ul id='${this.id}'></ul>
-                    <button class='button' id=d${this.id}>
-                        <i class='fas fa-folder-plus'></i>
-                    </button>
-                    <button class='button' id=l${this.id}>
-                        <i class='fas fa-link'></i>
-                    </button>
+                    ${this.name}
+                    <div style='display: block;'>
+                        <button class='button' id=d${this.id}>
+                            <i class='fas fa-folder-plus'></i>
+                        </button>
+                        <button class='button' id=l${this.id}>
+                            <i class='fas fa-link'></i>
+                        </button>
+                    </div>
                 </div>
             </li>
             `;
@@ -80,8 +82,6 @@ class Node {
 function listChildren(id, ids) {
     for (var key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !ids.includes(key)) {
-            console.log("heres a key:");
-            console.log(key);
             document.getElementById(id).innerHTML += linkTree[key].toHtml();
             ids.push(key);    
         }
@@ -90,15 +90,20 @@ function listChildren(id, ids) {
 
 /* Creates all eventhandlers under id parent */
 function createEventHandlers(id) {
+    console.log("Createeventhandlers");
     for (var key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !linkTree[key].isLink) {
-            console.log(key);
+            console.log("key" + key);
             document.getElementById("d" + key).addEventListener("click", function () {
                 promptText(this.id.substr(1), false);
             });
             document.getElementById("l" + key).addEventListener("click", function () {
                 promptText(this.id.substr(1), true);
             });
+
+            if (linkTree[key].children > 0) {
+                createEventHandlers(key);
+            }
         }
     }
 }
@@ -155,11 +160,8 @@ var ids = ["0"];
 function loadTree() {
     for (key in linkTree) {
         if (!ids.includes(key)) {
-            console.log("didnt include");
-            console.log(key);
             listChildren(key.slice(0, -1), ids);
         }
-        console.log(ids);
     }
 }
 
@@ -176,20 +178,15 @@ function compare(a, b) {
 
 /* Creates an event listener for the option to create link or directory for each node. */
 window.onload = function () {
-    for (var key in linkTree) {
-        if (!linkTree[key].link) {
-            document.getElementById("d" + linkTree[key].id).addEventListener("click", function () {
-                promptText(key, false);
-            });
-            document.getElementById("l" + linkTree[key].id).addEventListener("click", function () {
-                promptText(key, true);
-            });
-        }
-    }
+    document.getElementById("d0").addEventListener("click", function () {
+        promptText("0", false);
+    });
+    document.getElementById("l0").addEventListener("click", function () {
+        promptText("0", true);
+    });
 
     storageItems = Object.entries(localStorage);
     storageItems.sort(compare);
-    console.log(storageItems);
 
     for (var i = 0; i < storageItems.length; i++) {
         var code = storageItems[i][1];
@@ -202,13 +199,18 @@ window.onload = function () {
 
         /* Create Node for either a link or a directory */
         if (ld === "l") {
+            linkTree[code[1].slice(0, -1)].children++;
             linkTree[code[1]] = new Node(code[1], true, code[0], "", code[1].slice(0, -1), 0);
         } else {
+            linkTree[code[1].slice(0, -1)].children++;
             linkTree[code[1]] = new Node(code[1], false, "", code[0], code[1].slice(0, -1), 0);
         }
     }
 
     loadTree();
+
+    /* Prevent duplicate event handlers */
+    eventHandlers = [];
 
     /* Create event handlers */
     for (var i = 0; i < storageItems.length; i++) {
@@ -217,7 +219,8 @@ window.onload = function () {
         var ld = code.substr(0, 1);
 
         /* Only create if directory */
-        if (ld === "d") {
+        if (ld === "d" && !eventHandlers.includes(id.slice(0, -1))) {
+            eventHandlers += id.slice(0, -1);
             createEventHandlers(id.slice(0, -1));
         }
     }

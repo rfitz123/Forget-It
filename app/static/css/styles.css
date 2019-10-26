@@ -10,9 +10,19 @@ body {
     padding: 0;
 }
 
+/* div {
+    border: 5px solid black
+} */
+
 ul {
     list-style-type: none;
+    padding: 0;
 }  
+
+ul > li {
+    display: inline-block;
+    zoom: 1;
+}
 
 .parent {
     position: relative;
@@ -26,9 +36,7 @@ ul {
     font-family: 'Open Sans', sans-serif;
     font-size: 0.75vw;
     text-align: center;
-    top: 40%;
-    -webkit-transform: translateY(-50%);
-    transform: translateY(-50%)
+    bottom: calc(50% - 30px);
 }
 
 .button {
@@ -36,7 +44,8 @@ ul {
     border: none;
     outline: none;
     color: white;
-    padding: 15px 25px;
+    padding: 15px 15px;
+    border-radius: 999px;
     text-align: center;
     font-size: 25px;
     cursor: pointer;
@@ -46,12 +55,22 @@ ul {
     background-color: #54bf6c;
 }
 
+.rectangle {
+    position: absolute;
+    height: 30%;
+    width: 2%;
+    bottom: 20%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    background-color: #755331;
+}
+
 .ground {
     position: absolute;
     height: 20%;
     width: 100%;
     bottom: 0;
-    text-align: center;
     background-color: #2cb84b;
 }
 
@@ -61,10 +80,12 @@ ul {
     font-family: 'Open Sans', sans-serif;
     font-size: 3.5vw;
     width: 60%;
-    top: 50%;
-    height: 50%;
+    height: 10%;
+    bottom: 5%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
     border-radius: 999px;
     border: none;
     outline: none;
-    transform: translateX(-50%) translateY(-50%);
 }
