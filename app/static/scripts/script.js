@@ -50,19 +50,21 @@ class Node {
 
             html_str = `
             <li>
-                    <div id='div${this.id}' style='display: block; padding-bottom: 20px;'>
-                        <a href=${textValue}>
-                            <div class='link-leaf'>${textValue}</div>
-                        </a>
-                    </div>
+                <div id='div${this.id}' style='display: block; padding-bottom: 20px;'>
+                    <a href=${textValue} target="_blank">
+                        <div class='link-leaf' id='${this.id}'>
+                            <i class='fas fa-external-link-alt'></i>
+                        </div>
+                    </a>
+                </div>
             </li>
             `;
         } else {
             html_str = `
             <li>
-                <div>
+                <div style='color: white;'>
                     <ul id='${this.id}'></ul>
-                    ${this.name}
+                    <p style='display: inline-block; padding: 0; margin: 0;'>${this.name}</p>
                     <div style='height: calc(${10 / this.id.length}vh - 70px);'></div>
                     <div id='div${this.id}' style='display: block;'>
                         <button class='button' id=d${this.id}>
@@ -92,15 +94,12 @@ function connectNodes() {
             childRect = document.getElementById("div" + key).getBoundingClientRect();
             parentRect = document.getElementById("div" + key.slice(0, -1)).getBoundingClientRect();
 
-            console.log(key);
-            console.log(childRect);
-            console.log(parentRect);
-
             x1 = childRect.left + (childRect.width / 2);
             y1 = childRect.top + 27.5;
             x2 = parentRect.left + (parentRect.width / 2);
             y2 = parentRect.top + 27.5;
-            document.getElementById('connection-space').innerHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="40" stroke-linecap="round"/>`;
+            
+            document.getElementById('connection-space').innerHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="${40 / Math.sqrt(linkTree[key].id.length)}" stroke-linecap="round"/>`;
         }
     }
 }
@@ -115,11 +114,15 @@ function listChildren(id, ids) {
     }
 }
 
+/* Display the children of parentId node in a side menu */
+function showContents(parentId) {
+    document.getElementById('question-box').innerHTML = `<p style='font-size: 1vw'>${this.parentId}</p>`;
+}
+
 /* Creates all eventhandlers under id parent */
 function createEventHandlers(id) {
-    for (var key in linkTree) {
+    for (let key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !linkTree[key].isLink) {
-            console.log("key" + key);
             document.getElementById("d" + key).addEventListener("click", function () {
                 promptText(this.id.substr(1), false);
             });
@@ -130,6 +133,13 @@ function createEventHandlers(id) {
             if (linkTree[key].children > 0) {
                 createEventHandlers(key);
             }
+        } else if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
+            document.getElementById(key).addEventListener("mouseenter", function () {
+                document.getElementById('my-text-field').value = linkTree[key].link;
+            });
+            document.getElementById(key).addEventListener("mouseleave", function () {
+                document.getElementById('my-text-field').value = "";
+            });
         }
     }
 }
@@ -171,6 +181,7 @@ function promptText(key, isLink) {
 
     loadTree();
     createEventHandlers(id.slice(0, -1));
+    connectNodes();
 }
 
 /* Dictionary holding our tree of Nodes */
@@ -188,7 +199,6 @@ function loadTree() {
             listChildren(key.slice(0, -1), ids);
         }
     }
-    connectNodes();
 }
 
 /* Comparison function to sort localStorage items */
@@ -204,13 +214,11 @@ function compare(a, b) {
 
 /* Creates an event listener for the option to create link or directory for each node. */
 window.onload = function () {
-    document.getElementById("d0").addEventListener("click", function () {
-        promptText("0", false);
-    });
-    document.getElementById("l0").addEventListener("click", function () {
-        promptText("0", true);
-    });
 
+    /* Redraw connections if window resized or content loads */
+    window.addEventListener("resize", connectNodes);
+    document.addEventListener("DOMContentLoaded", connectNodes);
+    
     storageItems = Object.entries(localStorage);
     storageItems.sort(compare);
 
@@ -235,20 +243,8 @@ window.onload = function () {
 
     loadTree();
 
-    /* Prevent duplicate event handlers */
-    eventHandlers = [];
+    /* Recursively creates all eventhandlers */
+    createEventHandlers("");
 
-    /* Create event handlers */
-    for (var i = 0; i < storageItems.length; i++) {
-        var code = storageItems[i][1];
-        var id = "0" + storageItems[i][1].split(',')[1];
-        var ld = code.substr(0, 1);
-
-        /* Only create if directory */
-        if (ld === "d" && !eventHandlers.includes(id.slice(0, -1))) {
-            eventHandlers += id.slice(0, -1);
-            createEventHandlers(id.slice(0, -1));
-        }
-    }
     connectNodes();
 }
