@@ -25,7 +25,7 @@ class Node {
     */
 
     toStorageString() {
-        var node_str = "";
+        let node_str = "";
 
         if (this.isLink) {
             node_str += "l";
@@ -42,14 +42,14 @@ class Node {
     }
 
     toHtml() {
-        var html_str = "";
+        let html_str = "";
 
         if (this.isLink) {
             /* Makes the link more usable */
-            var textValue = verifyLink(this.link);
+            let textValue = verifyLink(this.link);
 
             html_str = `
-            <li>
+            <li id='li${this.id}'>
                 <div class='link-div' id='div${this.id}' style='display: block; padding-bottom: 20px;'>
                     <a href=${textValue} target="_blank">
                         <div class='link-leaf' id='${this.id}'>
@@ -61,7 +61,7 @@ class Node {
             `;
         } else {
             html_str = `
-            <li>
+            <li id='li${this.id}'>
                 <div style='color: white;'>
                     <ul id='${this.id}'></ul>
                     <p style='display: inline-block; padding: 0; margin: 0;'>${this.name}</p>
@@ -99,19 +99,39 @@ function connectNodes() {
             x2 = parentRect.left + (parentRect.width / 2);
             y2 = parentRect.top + 27.5;
             
-            document.getElementById('connection-space').innerHTML += `<line class='branch' id='line-${key}' x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="${40 / Math.sqrt(linkTree[key].id.length)}" stroke-linecap="round" onlick="console.log("test")"/>`;
+            document.getElementById('connection-space').innerHTML += `<line class='branch' id='line-${key}' x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="${40 / Math.sqrt(linkTree[key].id.length)}" stroke-linecap="round"/>`;
         }
     }
 }
 
 /* Recursively deletes itself and its children */
 function deleteBranch(deleteKey) {
-    console.log(deleteKey);
+    let tempNode = linkTree[deleteKey];
+
+    /* Delete from localStorage */
+    window.localStorage.removeItem(tempNode.id);
+
+    /* Call deleteBranch on any children. */
+    if (tempNode.children > 0) {
+        for (let i = 1; i <= tempNode.children; i++) {
+            deleteBranch(tempNode.id + i);
+        }
+    }
+
+    /* Delete the node from linkTree */
+    delete linkTree[tempNode.id];
+
+    let index = ids.indexOf(tempNode.id);
+
+    /* Remove from ids */
+    if (index > -1) {
+        ids.splice(index, 1);
+    }
 }
 
 /* Visually lays out children of Node id */
 function listChildren(id, ids) {
-    for (var key in linkTree) {
+    for (let key in linkTree) {
         if (key.length == id.length + 1 && key.slice(0, id.length) === id && !ids.includes(key)) {
             document.getElementById(id).innerHTML += linkTree[key].toHtml();
             ids.push(key);    
@@ -165,7 +185,7 @@ function verifyLink(link) {
 
 /* Prompts user text to create a folder or link */
 function promptText(key, isLink) {
-    var node = linkTree[key];
+    let node = linkTree[key];
     node.children += 1;
     id = node.id + node.children.toString();
 
@@ -204,7 +224,7 @@ var ids = ["0"];
 
 /* Visually loads tree and event listeners, reused every time an edit is made */
 function loadTree() {
-    for (key in linkTree) {
+    for (let key in linkTree) {
         if (!ids.includes(key)) {
             listChildren(key.slice(0, -1), ids);
         }
@@ -232,10 +252,10 @@ window.onload = function () {
     storageItems = Object.entries(localStorage);
     storageItems.sort(compare);
 
-    for (var i = 0; i < storageItems.length; i++) {
-        var code = storageItems[i][1];
+    for (let i = 0; i < storageItems.length; i++) {
+        let code = storageItems[i][1];
 
-        var ld = code.substr(0, 1);
+        let ld = code.substr(0, 1);
         code = code.substr(1).split(',');
 
         /* We removed the leading 0 for storage efficiency, putting it back */
@@ -262,7 +282,22 @@ window.onload = function () {
     document.getElementById("connection-space").addEventListener("click", function () {
         const isSvg = event.target.classList.contains('connection-space');
         if (!isSvg) {
-            deleteBranch(event.target.id.substr(5));
+
+            let tempId = event.target.id.substr(5);
+            
+            /* Remove already drawn elements */
+            let li = document.getElementById("li" + event.target.id.substr(5));
+            li.parentNode.removeChild(li);
+            
+            for (let key in linkTree) {
+                if (key.length >= tempId.length && key.slice(0, tempId.length) === tempId) {
+                    let line = document.getElementById("line-" + key);
+                    line.parentNode.removeChild(line);
+                }
+            }
+
+            deleteBranch(tempId);
+            loadTree();
         }
     });
 }
