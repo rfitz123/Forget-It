@@ -50,7 +50,7 @@ class Node {
 
             html_str = `
             <li>
-                <div id='div${this.id}' style='display: block; padding-bottom: 20px;'>
+                <div class='link-div' id='div${this.id}' style='display: block; padding-bottom: 20px;'>
                     <a href=${textValue} target="_blank">
                         <div class='link-leaf' id='${this.id}'>
                             <i class='fas fa-external-link-alt'></i>
@@ -89,7 +89,7 @@ function connectNodes() {
     /* Clear existing connections */
     document.getElementById('connection-space').innerHTML = "";
 
-    for(var key in linkTree) {
+    for(let key in linkTree) {
         if(key !== "0") {
             childRect = document.getElementById("div" + key).getBoundingClientRect();
             parentRect = document.getElementById("div" + key.slice(0, -1)).getBoundingClientRect();
@@ -99,9 +99,14 @@ function connectNodes() {
             x2 = parentRect.left + (parentRect.width / 2);
             y2 = parentRect.top + 27.5;
             
-            document.getElementById('connection-space').innerHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="${40 / Math.sqrt(linkTree[key].id.length)}" stroke-linecap="round"/>`;
+            document.getElementById('connection-space').innerHTML += `<line class='branch' id='line-${key}' x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#755331" stroke-width="${40 / Math.sqrt(linkTree[key].id.length)}" stroke-linecap="round" onlick="console.log("test")"/>`;
         }
     }
+}
+
+/* Recursively deletes itself and its children */
+function deleteBranch(deleteKey) {
+    console.log(deleteKey);
 }
 
 /* Visually lays out children of Node id */
@@ -112,11 +117,6 @@ function listChildren(id, ids) {
             ids.push(key);    
         }
     }
-}
-
-/* Display the children of parentId node in a side menu */
-function showContents(parentId) {
-    document.getElementById('question-box').innerHTML = `<p style='font-size: 1vw'>${this.parentId}</p>`;
 }
 
 /* Creates all eventhandlers under id parent */
@@ -135,7 +135,17 @@ function createEventHandlers(id) {
             }
         } else if (key.length == id.length + 1 && key.slice(0, id.length) === id) {
             document.getElementById(key).addEventListener("mouseenter", function () {
-                document.getElementById('my-text-field').value = linkTree[key].link;
+
+                let tempLink = linkTree[key].link;
+
+                /* Remove leading shit to clean up visually */
+                if (tempLink.includes("https://")) {
+                    tempLink = tempLink.substr(8);
+                } else if (tempLink.includes("http://")){
+                    tempLink = tempLink.substr(7);
+                }
+
+                document.getElementById('my-text-field').value = tempLink;
             });
             document.getElementById(key).addEventListener("mouseleave", function () {
                 document.getElementById('my-text-field').value = "";
@@ -247,4 +257,12 @@ window.onload = function () {
     createEventHandlers("");
 
     connectNodes();
+
+    /* Create SVG deletion eventlistener */
+    document.getElementById("connection-space").addEventListener("click", function () {
+        const isSvg = event.target.classList.contains('connection-space');
+        if (!isSvg) {
+            deleteBranch(event.target.id.substr(5));
+        }
+    });
 }
