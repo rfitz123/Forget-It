@@ -298,6 +298,7 @@ window.onload = function () {
 
             deleteBranch(tempId);
             loadTree();
+            connectNodes();
         }
     });
 }
