@@ -21,7 +21,7 @@ body {
     text-align: center;
 }
 
-.info p {
+.info > p {
     margin: 0;
     padding-top: 10px;
     padding-right: 10px;
@@ -35,6 +35,29 @@ body {
     pointer-events: auto;
     color: #697fb8;
     text-align: center;
+}
+
+.help {
+    height: 30px;
+}
+
+.help p {
+    position: relative;
+    top: 2px;
+    font-weight: 600;
+}
+
+.help-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    color: #697fb8;
+}
+
+.help-icon {
+    position: relative;
+    top: 2.5px;
+    font-size: 20px;
 }
 
 ul {
