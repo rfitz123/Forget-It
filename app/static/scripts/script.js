@@ -64,7 +64,6 @@ class Node {
             <li id='li${this.id}'>
                 <div style='color: white;'>
                     <ul id='${this.id}'></ul>
-                    <p style='display: inline-block; padding: 0; margin: 0;'>${this.name}</p>
                     <div style='height: calc(${10 / this.id.length}vh - 70px);'></div>
                     <div id='div${this.id}' style='display: block;'>
                         <button class='button' id=d${this.id}>
@@ -74,6 +73,7 @@ class Node {
                             <i class='fas fa-link'></i>
                         </button>
                     </div>
+                    <p style='display: inline-block; padding: 0; margin: 0;'>${this.name}</p>
                 </div>
             </li>
             `;

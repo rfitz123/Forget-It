@@ -155,8 +155,6 @@ a {
     width: 40px;
     bottom: 20%;
     left: 50%;
-    border-top-left-radius: 999px;
-    border-top-right-radius: 999px;
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
     background-color: #755331;
